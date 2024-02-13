@@ -103,7 +103,7 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
             _, Xj[i], Yj[i], phi[i], Ln[i] = check_crossing(Xi[i], Yi[i], Xj[i], Yj[i], H, phi[i], Ln[i], Dl, cell_width, cell_height)
 
             # determine connections:
-            P = np.sqrt(np.power(Xj[i]-X,2) + np.power(Yj[i]-Y,2)) < r_dendrite
+            P = np.sqrt(np.power(Xj[i]-X,2) + np.power(Yj[i]-Y,2)) < 2*r_dendrite
             P[i] = 0    # no self-connections
             for j in np.arange(M)[P==1]:    # for all neurons for which axon is close
                 # check whether dendrites cross border:
@@ -136,7 +136,15 @@ def get_H(row, col, H):
     return H[row,col]
 
 def get_P(H_i, H_j):
-    return int(H_i == H_j)
+    # values from Hernandez-Navarro thesis
+    h = np.array([ 0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
+    p01 = np.array([ 1, 0.0007, 0.00045, 0.00035, 0.00030, 0.00025, 0.00015, 0.00002, 0 ])
+    p10 = np.array([ 1, 0.0066, 0.0033, 0.0033, 0.0033, 0.0033, 0.00200, 0.00050, 0 ]) 
+    Dh = H_j-H_i
+    if Dh > 0:
+        return np.interp(Dh, h, p01)
+    else:
+        return np.interp(abs(Dh), h, p10)
 
 def check_crossing(xi, yi, xj, yj, H, phi, Ln, Dl, cell_width, cell_height):
     crossed = True
@@ -159,23 +167,23 @@ def check_crossing(xi, yi, xj, yj, H, phi, Ln, Dl, cell_width, cell_height):
                 B = (xj, yj)
                 if xborder >= 0 and yborder >= 0:
                     # we are crossing 2 borders, life is hard
-                    Px = (xborder, -10*height)
-                    Qx = (xborder, 10*height)
-                    Px = (-10*width, yborder)
-                    Qx = (10*width, yborder)
+                    Px = (xborder, -1000*cell_height)
+                    Qx = (xborder, 1000*cell_height)
+                    Py = (-1000*cell_width, yborder)
+                    Qy = (1000*cell_width, yborder)
                     P,Q = (Py, Qy) if distance(A, Py, Qy) < distance(A, Px, Qx) else (Px, Qx)
                 elif xborder >= 0:
-                    P = (xborder, -10*height)
-                    Q = (xborder, 10*height)
+                    P = (xborder, -1000*cell_height)
+                    Q = (xborder, 1000*cell_height)
                 elif yborder >= 0:
-                    P = (-10*width, yborder)
-                    Q = (10*width, yborder)
+                    P = (-1000*cell_width, yborder)
+                    Q = (1000*cell_width, yborder)
                 else: pass  # should not happen though
 
                 angle_AB_on_PQ = get_angle(A, B, P, Q)
-                if ( abs(angle_AB_on_PQ) <= np.pi/6.0 ) or ( np.randon.rand() < (1-P_cross) ):
+                if ( abs(angle_AB_on_PQ) <= np.pi/6.0 ) or ( np.random.rand() < (1-P_cross) ):
                     # deflect axon:
-                    phi[i] = get_slope(P, Q) if angle_AB_on_PQ < 0 else get_slopw(Q, P)
+                    phi = get_slope(P, Q) if angle_AB_on_PQ < 0 else get_slope(Q, P)
                     xj = xi + Dl*np.cos(phi)
                     yj = yi + Dl*np.sin(phi)
                     re_check = True
@@ -184,3 +192,16 @@ def check_crossing(xi, yi, xj, yj, H, phi, Ln, Dl, cell_width, cell_height):
                     # axon crosses the obstacle:
                     Ln -= abs(H_j-H_i)
     return crossed, xj, yj, phi, Ln
+
+def distance(A,P,Q):
+    num = (Q[0]-P[0])*(P[1]-A[1]) - (P[0]-A[0])*(Q[1]-P[1])
+    den = np.sqrt((Q[0]-P[0])**2+(Q[1]-P[1])**2)
+    return num/den
+
+def get_slope(A,B):
+    return np.arctan2(B[1]-A[1],B[0]-A[0])
+
+def get_angle(A,B,P,Q):
+    ''' angle of AB w. resp of PQ '''
+    return np.angle(np.exp(1j*(get_slope(A,B)-get_slope(P,Q))))
+
