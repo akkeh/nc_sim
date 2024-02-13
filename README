@@ -1,0 +1,15 @@
+[ nc_sim ]
+Neuronal culture simulator
+==========================
+A small python package to simulate the growth (axons.*) and activity (neurons.*) of neuronal cultures in environment with obastacles
+
+byt: Akke Mats Houben (akkemats.houben@ub.edu -- akkeh.github.io)
+
+License
+=========================
+This code belongs to the publication: ....
+
+Please cite as:
+...
+
+<other license info to come...>
