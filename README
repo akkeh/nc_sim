@@ -3,11 +3,14 @@ Neuronal culture simulator
 ==========================
 A small python package to simulate the growth (axons.*) and activity (neurons.*) of neuronal cultures in environment with obastacles
 
-byt: Akke Mats Houben (akkemats.houben@ub.edu -- akkeh.github.io)
+by: Akke Mats Houben (akkemats.houben@ub.edu -- akkeh.github.io)
 
 License
 =========================
-This code belongs to the publication: ....
+This code belongs to an upcoming publication (in prep.). 
+Please contact me for the correct reference if you use this code for anything.
+
+Other than that, all rights reserved for now...
 
 Please cite as:
 ...
