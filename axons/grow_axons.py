@@ -103,7 +103,7 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
             _, Xj[i], Yj[i], phi[i], Ln[i] = check_crossing(Xi[i], Yi[i], Xj[i], Yj[i], H, phi[i], Ln[i], Dl, cell_width, cell_height)
 
             # determine connections:
-            P = np.sqrt(np.power(Xj[i]-X,2) + np.power(Yj[i]-Y,2)) < 2*r_dendrite
+            P = np.sqrt(np.power(Xj[i]-X,2) + np.power(Yj[i]-Y,2)) < r_dendrite
             P[i] = 0    # no self-connections
             for j in np.arange(M)[P==1]:    # for all neurons for which axon is close
                 # check whether dendrites cross border:
