@@ -109,7 +109,7 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
                 # check whether dendrites cross border:
                 crossed, _, _, _, _ = check_crossing(X[j], Y[j], Xj[i], Yj[i], H, phi[i], Ln[i], Dl, cell_width, cell_height)
                 if crossed:
-                    W[i,j] = 1
+                    W[j,i] = 1
 
         # update axon cone positions:
         Xi = Xj
