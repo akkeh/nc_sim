@@ -1,3 +1,22 @@
+'''
+    nc_sim: neuronal culture growth and activity simulation in environments with obstacles
+    Please cite: ...
+    Copyright (C) 2024 Akke Mats Houben (akke@akkehouben.net)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+'''
+
 import numpy as np
 
 def place_neurons(width, height, H=[], **kwargs):
@@ -49,18 +68,29 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
                             #   h<0 : no neurons or axons can grow here
 
     # default arguments:
+    EIratio = 0.8   # excitatory-to-inhibitory ratio
     L       = 1.00  # average axon length (mm)
+    Le      = -1    # excitatory axon length (mm)
+    Li      = -1    # inhibitory axon length (mm)
     Dl      = 1e-3  # axon segment length (mm)
     phi_sd  = 0.1   # axon random walk std
 
     r_dendrite_mu   = 150e-3    # denrite radius mean (mm)
     r_dendrite_sd   = 20e-3     # denrite radius std
 
+    verbose = False
+
     # read optional arguments:
     for argn, argv in kwargs.items():
         match argn:
+            case 'EIratio':
+                EIratio = float(argv)
             case 'L':
                 L = float(argv)
+            case 'Le':
+                Le = float(argv)
+            case 'Li':
+                Li = float(argv)
             case 'Dl':
                 Dl = float(argv)
             case 'phi_sd':
@@ -69,9 +99,15 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
                 r_dendrite_mu = float(argv)
             case 'r_dendrite_sd':
                 r_dendrite_sd = float(argv)
+            case 'verbose':
+                verbose = bool(argv)
+
+    Le = L if Le < 0 else Le
+    Li = L if Li < 0 else Li
 
     # some derived parameters:
     M = len(X)              # number of neurons
+    Me = int(M*EIratio)
     Hm,Hn = np.shape(H) if np.size(H) > 0 else (1,1)  # size of obstacles (PDMS) grid
     cell_height = height/Hm
     cell_width = width/Hn
@@ -81,7 +117,9 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
 
     r_dendrite = r_dendrite_mu + r_dendrite_sd*np.random.normal(0,1,M)
 
-    Ln = L*np.sqrt(-2*np.log(1-np.random.rand(M)))  # axon lengths
+    Ln = np.append(
+        Le*np.sqrt(-2*np.log(1-np.random.rand(Me))),   # axon lengths
+        Li*np.sqrt(-2*np.log(1-np.random.rand(M-Me))))
     Nl = int(np.max(Ln)/Dl)
 
     Xi = np.copy(X)
@@ -90,6 +128,8 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
 
     # main loop:
     for n in np.arange(1,Nl):
+        if verbose:
+            print(n, Nl)
         # determine axon growth direction:
         Dx = np.multiply(Dl*np.cos(phi), (n*Dl)<Ln)
         Dy = np.multiply(Dl*np.sin(phi), (n*Dl)<Ln)
@@ -118,6 +158,7 @@ def grow_W(width, height, X, Y, H=[], **kwargs):
         # random deviation for next step:
         phi += phi_sd*np.random.normal(0, 1, M)
 
+    W[:,Me:] *= -1
     return W
 
 def get_cell(x, y, cell_width, cell_height):
