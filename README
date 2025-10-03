@@ -6,5 +6,13 @@ A small python package to simulate the growth (axons.*) and activity (neurons.*)
 by: Akke Mats Houben (akkemats.houben@ub.edu -- akkeh.github.io)
 
 =========================
+To get started, use example/example.py
+
+=========================
+Requirements:
+    - numpy
+    - matplotlib (optional)
+
+=========================
 When using this code, please cite:
     A.M. Houben, J. Garcia-Ojalvo & J. Soriano, Role of connectivity anisotropies in the dynamics of cultured neuronal networks, arXiv:2501.04427 (2025)
