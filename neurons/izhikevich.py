@@ -92,6 +92,7 @@ def init_network(N, A, **kwargs):
         'Inp'   : v*0,
         'eta'   : v*0,
 
+        'S'         : np.mat(np.zeros((N,1))),
         'spike_T'   : [],
         'spike_Y'   : [],
 
@@ -133,6 +134,7 @@ def simulation_step(n, nw):
     P[:]    = P + dP*Dt
     R[:]    = R + dR*Dt
 
+    nw['S'][:] = 0
     for i in np.arange(len(v))[v>pars['vc']]:
         v[i] = pars['v0']
         u[i] = u[i] + pars['delta_u']
@@ -140,6 +142,7 @@ def simulation_step(n, nw):
         R[i] = (1-pars['beta_R'])*R[i]
         nw['spike_T'].append(n*Dt)
         nw['spike_Y'].append(i)
+        nw['S'][i] = 1
 
     return nw   # do not capture, nw is updated by reference
 
