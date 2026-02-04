@@ -100,7 +100,7 @@ def init_network(N, A, **kwargs):
     }
     return nw
 
-def simulation_step(n, nw):
+def simulation_step(n, nw, Iext=None):
     v = nw['v']
     u = nw['u']
     P = nw['P']
@@ -119,6 +119,7 @@ def simulation_step(n, nw):
 
     Inp[:]  = np.dot(nw['W'], P)    # synaptic input
     eta[:]  = pars['gW']*np.random.normal(0,1,nw['N'])   # noise drive
+    if Iext is not None: Inp[:] + Iext
     
     du[:]   = pars['a']*(pars['b']*v - u)
     dP[:Ne] = -P[:Ne]/pars['tauE']
@@ -146,9 +147,10 @@ def simulation_step(n, nw):
 
     return nw   # do not capture, nw is updated by reference
 
-def run_nw(nw):
+def run_nw(nw, Iext=None):
     Nt = nw['params']['Nt']
     for n in np.arange(1,Nt):
-        simulation_step(n,nw)
+        iext = Iext[:,n] if Iext is not None else None
+        simulation_step(n, nw, iext)
 
     
