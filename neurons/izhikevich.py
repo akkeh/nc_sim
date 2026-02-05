@@ -119,7 +119,7 @@ def simulation_step(n, nw, Iext=None):
 
     Inp[:]  = np.dot(nw['W'], P)    # synaptic input
     eta[:]  = pars['gW']*np.random.normal(0,1,nw['N'])   # noise drive
-    if Iext is not None: Inp[:] + Iext
+    if Iext is not None: Inp[:] = Inp + Iext
     
     du[:]   = pars['a']*(pars['b']*v - u)
     dP[:Ne] = -P[:Ne]/pars['tauE']
