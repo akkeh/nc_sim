@@ -92,7 +92,7 @@ def init_network(N, A, **kwargs):
         'Inp'   : v*0,
         'eta'   : v*0,
 
-        'S'         : np.mat(np.zeros((N,1))),
+        'S'         : np.zeros(N),
         'spike_T'   : [],
         'spike_Y'   : [],
 
@@ -147,7 +147,7 @@ def simulation_step(n, nw, Iext=None):
 
     return nw   # do not capture, nw is updated by reference
 
-def run_nw(nw, Iext=None):
+def run_nw(nw, Iext=None, Iext_t=None, Iext_y=None):
     Nt = nw['params']['Nt']
     for n in np.arange(1,Nt):
         iext = Iext[:,n] if Iext is not None else None
